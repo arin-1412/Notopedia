@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notespedia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+    }
+    header {
+      background: #1e1e1e;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #00f2ff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+    .card {
+      background: #2a2a2a;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.8);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      color: #00f2ff;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: #1e1e1e;
+      font-size: 14px;
+      color: #888;
+    }
+    .note-upload, .quiz-section, .login-section, .leaderboard-section {
+      background-color: #2a2a2a;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 700px;
+      border-radius: 16px;
+    }
+    input[type="text"], input[type="file"], select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background-color: #00f2ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 12px;
+    }
+    .leaderboard-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .leaderboard-section li {
+      background: #1c1c1c;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>📘 Notespedia – Learn. Share. Win.</header>
+
+  <div class="container">
+    <div class="card" onclick="location.href='#notes'">
+      <h2>📄 Upload Notes</h2>
+      <p>Upload and preview your notes (PDFs).</p>
+    </div>
+    <div class="card" onclick="location.href='#quiz'">
+      <h2>📝 Take Quizzes</h2>
+      <p>Attempt subject-wise quizzes and earn NOTO points.</p>
+    </div>
+    <div class="card" onclick="location.href='#leaderboard'">
+      <h2>🏆 Leaderboard</h2>
+      <p>Check the top contributors and quiz masters.</p>
+    </div>
+    <div class="card">
+      <h2>🌟 Student of the Month</h2>
+      <p>Most active student gets featured here!</p>
+    </div>
+  </div>
+
+  <section class="login-section">
+    <h2>Login (Enter Your Name)</h2>
+    <input type="text" id="username" placeholder="Enter your name">
+    <button onclick="loginUser()">Login</button>
+  </section>
+
+  <section id="notes" class="note-upload">
+    <h2>Upload Your Notes</h2>
+    <input type="file" id="noteFile" accept="application/pdf">
+    <select id="noteSubject">
+      <option>Select Subject</option>
+      <option>Maths</option>
+      <option>Biology</option>
+      <option>Chemistry</option>
+      <option>Physics</option>
+      <option>SST</option>
+    </select>
+    <button onclick="uploadNote()">Upload</button>
+    <iframe id="pdfPreview"></iframe>
+  </section>
+
+  <section id="quiz" class="quiz-section">
+    <h2>Quiz Time</h2>
+    <select id="quizSubject">
+      <option>Select Subject</option>
+      <option>Maths</option>
+      <option>Biology</option>
+      <option>Chemistry</option>
+      <option>Physics</option>
+      <option>SST</option>
+    </select>
+    <button onclick="takeQuiz()">Start Quiz</button>
+  </section>
+
+  <section id="leaderboard" class="leaderboard-section">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+  </section>
+
+  <div class="footer">
+    Built by Arin Joshi. MIT Aspirant | GitHub: arin-1412
+  </div>
+
+  <script>
+    let currentUser = null;
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || {};
+
+    function loginUser() {
+      const name = document.getElementById('username').value.trim();
+      if (name) {
+        currentUser = name;
+        alert(`Welcome, ${currentUser}!`);
+        if (!leaderboard[currentUser]) leaderboard[currentUser] = 0;
+        saveLeaderboard();
+        updateLeaderboardUI();
+      }
+    }
+
+    function uploadNote() {
+      if (!currentUser) return alert('Login first.');
+      leaderboard[currentUser] += 5;
+      saveLeaderboard();
+      updateLeaderboardUI();
+      alert('+5 NOTO Points for uploading notes!');
+      document.getElementById('pdfPreview').src = 'https://mozilla.github.io/pdf.js/web/viewer.html';
+    }
+
+    function takeQuiz() {
+      if (!currentUser) return alert('Login first.');
+      const score = Math.floor(Math.random() * 10) + 1;
+      if (score > 7) {
+        leaderboard[currentUser] += 10;
+        alert(`Great score! +10 NOTO Points`);
+      } else {
+        alert(`You scored ${score}/10. Try again!`);
+      }
+      saveLeaderboard();
+      updateLeaderboardUI();
+    }
+
+    function saveLeaderboard() {
+      localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+    }
+
+    function updateLeaderboardUI() {
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = '';
+      const sorted = Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
+      for (let [name, points] of sorted) {
+        const li = document.createElement('li');
+        li.textContent = `${name}: ${points} NOTO points`;
+        list.appendChild(li);
+      }
+    }
+
+    window.onload = updateLeaderboardUI;
+  </script>
+</body>
+</html>
